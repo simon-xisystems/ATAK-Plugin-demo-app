@@ -1,0 +1,101 @@
+configurations {
+    androidTestCompileOnly.extendsFrom compileOnly
+    testImplementation.extendsFrom compileOnly
+}
+
+repositories { 
+    flatDir {
+        dirs '../espresso'
+    }
+}
+
+// In order to run the espresso tests, this script needs to bump up the min sdk version to 26
+android { 
+    defaultConfig {
+        minSdkVersion 26
+    }
+
+    // In order for the test harness to run on the Samsung S9 and possibly others, add in the compilation options
+    compileOptions {
+         sourceCompatibility JavaVersion.VERSION_1_8
+         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    // WARNING: when including dependencies, take care they are not already included in the ATAK apk. Dependencies included in the instrumentation APK and the ATAK APK may cause errors. In my case it caused the Activity::onStart command to hang because I included appcompat and support in the instrumentation APK. The solution for this is to use CompileOnly
+
+
+    // Include a unit test dependency that breaks AndroidTests if it's included in them, and so can't be included from build.gradle.
+    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
+    testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.2'
+
+    // If ATAKPluginTests is available as a submodule, load that. Otherwise we assume the plugin is
+    // loading the dependency from Maven itself.
+    if (new File("$rootProject.projectDir/ATAKPluginTests").exists()) {
+        androidTestImplementation project(":ATAKPluginTests")
+        testImplementation project(":ATAKPluginTests")
+        println("using the submodule version of ATAKPluginTests")
+    } else {
+
+        println("found local expresso testing library")
+        androidTestImplementation(name:'ATAKPluginTests-debug', ext:'aar')
+
+        androidTestImplementation 'androidx.lifecycle:lifecycle-runtime:2.0.0'
+
+        androidTestImplementation 'androidx.test:runner:1.2.0'
+        androidTestImplementation 'androidx.test:rules:1.2.0'
+        androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+        androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+        androidTestImplementation 'androidx.test.espresso:espresso-intents:3.2.0'
+        androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+        androidTestImplementation 'org.mockito:mockito-core:3.3.0'
+    
+        androidTestImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.2'
+        androidTestImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.2'
+
+    }
+
+    // This is an easy way to give androidTest and test access to the ATAK main.jar without needing
+    // to copy and paste the standard block that checks each possible location a bunch more times.
+    // This could backfire if there are other things plugins include as compileOnly that shouldn't
+    // be included this way? If so we should switch to a modified block from ATAKVersions.gradle.
+    configurations {
+        androidTestCompileOnly.extendsFrom compileOnly
+        testImplementation.extendsFrom compileOnly
+    }
+
+}
+
+android {
+    defaultConfig {
+        // NoFinishAndroidJUnitRunner ensures that the ATAK activity is not killed, that is its only difference from AndroidJUnitRunner
+        testInstrumentationRunner "com.atakmap.android.test.helpers.NoFinishAndroidJUnitRunner"
+        // ATAKStarter starts ATAK and sets it up to work well with automated tests
+        testInstrumentationRunnerArguments 'listener': 'com.atakmap.android.test.helpers.ATAKStarter'
+    }
+}
+
+// modApkTask.gradle contains the functions needed for instrumented tests to work
+// These functions take the skew name, for example modApk("Debug") will attach its tasks to the connectedDebugAndroidTest task
+// modApkTask.gradle also contains tasks that automatically take screenshots on test failure and attach them to the test report
+if (new File("$rootProject.projectDir/ATAKPluginTests").exists()) {
+    apply from: "$rootProject.projectDir/ATAKPluginTests/modApkTask.gradle"
+    println("using the submodule version of the ATAKPluginTests gradle plugin")
+} 
+else {
+    try { 
+        println("using a local version of the ATAKPluginTests gradle plugin from ..")
+        apply from: '../espresso/modApkTask.gradle'
+    } catch (Exception e) {
+        println("using a local version of the ATAKPluginTests gradle plugin from .")
+        apply from: './espresso/modApkTask.gradle'
+    } 
+}
+
+// Android tasks are added after this gradle file is configured, therefore in order to run this code we must run it in afterEvaluate. -- NOTE: In some cases nesting two afterEvaluate blocks can show even more tasks, depending on which build.gradle file you put your afterEvaluate block in.
+afterEvaluate {
+    // Android gradle by default does not allow you switch the targetPackage property on an instrumentation APK. This is a problem since the code for a plugin runs in ATAK not in the plugin APK. This task finds the AndroidManifest.xml file for the Instrumentation APK after it is generated, and manually switches the targetPackage value.
+    modAllSkews()
+}
