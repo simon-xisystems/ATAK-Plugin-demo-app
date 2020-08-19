@@ -1,7 +1,7 @@
 # TAK-Plugin-Template
 
 
-This is a template TAK plugin that has a fragment and issues a COT event to the TAK map via a button. This was developed to develop understanding of how to build TAK plugins.
+This is a template TAK plugin that is explained in my BLog post [Demo ATAK Plugin](https://www.ballantyne.online/?p=211)
 
 
-![Alt text](/Screenshot_20200811-120013_ATAK.jpg?raw=true "Template Plugin")
+![Alt text](/Screenshot.jpg?raw=true "Template Plugin")
