@@ -31,5 +31,11 @@ jobs:
           java-version: 1.8
       - name: where is everything
         run: dir
+      - name: Build with Gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: build
+          build-root-direcroty: atak-civ/plugins/plugintemplate/
+	        
           
          
