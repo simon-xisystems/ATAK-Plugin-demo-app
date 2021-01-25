@@ -33,4 +33,8 @@ jobs:
       - name: where is everything
         working-directory: ./atak-civ/plugins/plugintemplate
         run: dir
+      - name: Build with Gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: build
      
