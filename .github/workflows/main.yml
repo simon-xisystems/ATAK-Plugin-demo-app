@@ -36,5 +36,5 @@ jobs:
       - name: Build with Gradle
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: build
+          working-directory: ./atak-civ/plugins/plugintemplate
      
