@@ -35,4 +35,4 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           arguments: build
-          build-root-directory: atak-civ/plugins/plugintemplate/
+          build-root-directory: /atak-civ/plugins/plugintemplate/gradle/wrapper/
