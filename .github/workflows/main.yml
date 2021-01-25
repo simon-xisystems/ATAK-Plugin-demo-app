@@ -34,4 +34,4 @@ jobs:
       - name: Build with Gradle
         uses: eskatos/gradle-command-action@v1
         with:
-          wrapper-directory:: /atak-civ/plugins/plugintemplate/app/gradle/wrapper/
+          wrapper-directory: /atak-civ/plugins/plugintemplate/app/gradle/wrapper/
