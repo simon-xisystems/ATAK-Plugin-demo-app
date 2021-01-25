@@ -20,8 +20,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: windows-latest
     name: build-project
-    env:
-      working-directory: ./atak-civ/plugins/plugintemplate
+  
       
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -32,5 +31,6 @@ jobs:
         with:
           java-version: 1.8
       - name: where is everything
+        working-directory: ./atak-civ/plugins/plugintemplate
         run: dir
      
