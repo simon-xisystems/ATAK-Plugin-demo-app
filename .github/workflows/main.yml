@@ -20,7 +20,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: windows-latest
     name: build-project
-
+    env:
+      working-directory: ./atak-civ/plugins/plugintemplate
+      
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -31,7 +33,4 @@ jobs:
           java-version: 1.8
       - name: where is everything
         run: dir
-      - name: Build with Gradle
-        uses: eskatos/gradle-command-action@v1
-        with:
-          wrapper-directory: /atak-civ/plugins/plugintemplate/app/gradle/wrapper/
+     
