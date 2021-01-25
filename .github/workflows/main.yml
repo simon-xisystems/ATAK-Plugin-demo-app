@@ -1,0 +1,57 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+      
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+    name: build-project
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: Setup JDK
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 1.8
+      - name: Build with Gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: build
+      - name: Create Github Release
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: v${{github.run_number}}
+          release_name: Release v${{github.run_number}}
+      
+      - name: Setup and run tests
+        run: dir
+      - name: Upload Asset to Github Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{steps.create-new-release.outputs.upload_url}}
+          asset_path: ./build/distributions/bob-1.0-SNAPSHOT.zip
+          asset_name: bob-v${{github.run_number}}.zip
+          asset_content_type: application/zip
+          
+         
